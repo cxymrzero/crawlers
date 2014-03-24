@@ -151,7 +151,7 @@ class user:
 
     def agree(self):
         #获得赞同数 3,4
-        res = self.soup.find('div', {'class':'zm-profile-side-following zg-clear'})
+        res = self.soup.find('span', {'class':'zm-profile-header-user-agree'})
         res = res.strong.text
         return res
 
@@ -183,6 +183,13 @@ class user:
 
     def watching(self):
         #关注话题数 3,9
-        res = self.soup.find_all('div', {'class':'zm-profile-side-section-title'})
-        num = res[1].text.encode('utf-8').split()[1]
+        lst = []
+        res = self.soup.find_all('a', {'class':'zg-link-litblue'})
+        for item in res:
+            try:
+                lst.append(item.strong.text)
+            except AttributeError:
+                continue
+        num = lst[1].split()[0]
         return num
+
