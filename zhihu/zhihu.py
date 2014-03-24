@@ -45,7 +45,7 @@ class topic:
         res = []
         for item in lst:
             vote = item.text
-            res.append(vote)
+            res.append(vote)   
         return res
 
 class answer:
@@ -60,7 +60,8 @@ class answer:
         for item in lst:
             text = item.text.strip('\n') #去除话题两端的换行符
             res.append(text)
-        return res
+        ret = ', '.join(res)
+        return ret
         
     def watched(self):
         #问题关注人数 1,4
