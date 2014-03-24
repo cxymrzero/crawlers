@@ -26,7 +26,7 @@ class topic:
         res = []
         for item in lst:
             link = item['href']
-            link = ''.join('http://www.zhihu.com', link)
+            link = ''.join(['http://www.zhihu.com', link])
             res.append(link)
         return res
 
@@ -58,8 +58,8 @@ class answer:
         res = []
         lst = self.soup.find_all('a', {'class':'zm-item-tag'})
         for item in lst:
-            item = item.strip('\n') #去除话题两端的换行符
-            res.append(item.text)
+            text = item.text.strip('\n') #去除话题两端的换行符
+            res.append(text)
         return res
         
     def watched(self):
@@ -68,9 +68,10 @@ class answer:
         #注意是unicode对象
         return num
 
-    def answered(self):
+    def answerednum(self):
         #问题回答人数 1,2
-        num = self.soup.find('h2', {'id':'zh-question-answer-num'})#??
+        num = self.soup.find('h3', {'id':'zh-question-answer-num'})
+        num = num['data-num']
         return num
 
     def time(self):
@@ -86,17 +87,22 @@ class answer:
         #回答字数 2,1
         res = []
         lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=22)
-        lst.pop(0); lst.pop(1) #去除第两个空白部分
+        lst.pop(0); lst.pop(0) #去除前两个空白部分
+        #test = 0
         for item in lst:
             answerlen = len(item.text)
+            #print test
+            #print item.text
+            #print answerlen
             res.append(answerlen)
+            #test += 1
         return res
         
     def isunknown(self):
         #是否匿名 2,5
         #匿名值为1,否则为0
         res = []
-        lst = self.soup.find_all('h3', {'class':'zm-item-answer-author-wrap'})
+        lst = self.soup.find_all('h3', {'class':'zm-item-answer-author-wrap'}, limit=20)
         for item in lst:
             try:
                 item.a.text
@@ -110,6 +116,7 @@ class answer:
         #有图为1,无图为0
         res = []
         lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=22)
+        lst.pop(0); lst.pop(0)
         for item in lst:
             if (item.find('img', recursive=True)):
                 res.append(1)
