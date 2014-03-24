@@ -125,4 +125,64 @@ class answer:
         return res
 
 class user:
-    pass
+    def __init__(self, session, url):
+        self.r = session.get(url)
+        self.soup = BeautifulSoup(self.r.text, 'html.parser') 
+        self.url = url
+
+    def name(self):
+        #用户名 3,1
+        urlist = self.url.split('/')
+        uname = urlist[-1]
+        return uname
+
+    def location(self):
+        #居住地 3,2
+        res = self.soup.find('span', {'class':'info-wrap'})
+        res = res.span['title']
+        return res
+
+    def fans(self):
+        #粉丝数 3,3
+        res = self.soup.find('div', {'class':'zm-profile-side-following zg-clear'})
+        res = res.find_all('a')
+        res = res[1].strong.text
+        return res
+
+    def agree(self):
+        #获得赞同数 3,4
+        res = self.soup.find('div', {'class':'zm-profile-side-following zg-clear'})
+        res = res.strong.text
+        return res
+
+    def answered(self):
+        #回答过问题数 3,5
+        res = self.soup.find_all('span', {'class':'num'})
+        res = res[1].text
+        return res
+
+    def raised(self):
+        #提问数 3,6
+        res = self.soup.find_all('span', {'class':'num'})
+        res = res[0].text
+        return res
+
+    def goodat(self):
+        #擅长话题 3,7
+        res = self.soup.find_all('h3', {'class':'zg-gray-darker'})
+        lst = []
+        for item in res:
+            lst.append(item.text)
+        return lst
+
+    def job(self):
+        #职业 3,8
+        res = self.soup.find('span', {'class':'business'})
+        business = res['title']
+        return business
+
+    def watching(self):
+        #关注话题数 3,9
+        res = self.soup.find_all('div', {'class':'zm-profile-side-section-title'})
+        num = res[1].text.encode('utf-8').split()[1]
+        return num
