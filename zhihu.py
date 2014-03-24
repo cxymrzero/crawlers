@@ -93,8 +93,29 @@ class answer:
         return res
         
     def isunknown(self):
-        #是否匿名
-        pass
+        #是否匿名 2,5
+        #匿名值为1,否则为0
+        res = []
+        lst = self.soup.find_all('h3', {'class':'zm-item-answer-author-wrap'})
+        for item in lst:
+            try:
+                item.a.text
+                res.append(0)
+            except AttributeError:
+                res.append(1)
+        return res
+
+    def havePic(self):
+        #有无图 2,4
+        #有图为1,无图为0
+        res = []
+        lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=22)
+        for item in lst:
+            if (item.find('img', recursive=True)):
+                res.append(1)
+            else:
+                res.append(0)
+        return res
 
 class user:
     pass
