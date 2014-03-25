@@ -2,6 +2,7 @@
 #知乎的爬虫，用于搜集信息
 import requests
 from bs4 import BeautifulSoup
+#from celery.task import task
 
 def login():
     #模拟登陆，并返回requests.session()对象记住登陆状态
@@ -38,7 +39,7 @@ class topic:
             question = item.text
             res.append(question)
         return res
-
+    '''
     def vote(self):
         #赞同数 2,2
         lst = self.soup.find_all('a', {'class':'zm-item-vote-count'})
@@ -47,6 +48,7 @@ class topic:
             vote = item.text
             res.append(vote)   
         return res
+    '''
 
 class answer:
     def __init__(self, session, url):
@@ -78,7 +80,7 @@ class answer:
     def time(self):
         #问题回答时间 2,3
         res = []
-        lst = self.soup.find_all('a', {'class':'answer-date-link meta-item'}, limit=20)
+        lst = self.soup.find_all('a', {'class':'answer-date-link meta-item'}, limit=10)
         for item in lst:
             text = item.text
             res.append(text)
@@ -87,7 +89,7 @@ class answer:
     def wordcount(self):
         #回答字数 2,1
         res = []
-        lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=22)
+        lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=12)
         lst.pop(0); lst.pop(0) #去除前两个空白部分
         #test = 0
         for item in lst:
@@ -98,12 +100,20 @@ class answer:
             res.append(answerlen)
             #test += 1
         return res
+
+    def agree(self):
+        #点赞数 2,2
+        res = []
+        lst = self.soup.find_all('button', {'class':'up'}, limit=10)
+        for item in lst:
+            res.append(item.find_all('span')[1].text)
+        return res
         
     def isunknown(self):
         #是否匿名 2,5
         #匿名值为1,否则为0
         res = []
-        lst = self.soup.find_all('h3', {'class':'zm-item-answer-author-wrap'}, limit=20)
+        lst = self.soup.find_all('h3', {'class':'zm-item-answer-author-wrap'}, limit=10)
         for item in lst:
             try:
                 item.a.text
@@ -116,13 +126,23 @@ class answer:
         #有无图 2,4
         #有图为1,无图为0
         res = []
-        lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=22)
+        lst = self.soup.find_all('div', {'class':'zm-editable-content'}, limit=12)
         lst.pop(0); lst.pop(0)
         for item in lst:
             if (item.find('img', recursive=True)):
                 res.append(1)
             else:
                 res.append(0)
+        return res
+
+    def getUser(self):
+        #获取用户主页地址链接
+        res = []
+        lst = self.soup.find_all('a', {'class':'zm-item-link-avatar'}, limit=10)
+        for item in lst:
+            link = item['href'].encode('utf-8')
+            link = ''.join(['http://www.zhihu.com', link])
+            res.append(link)
         return res
 
 class user:
@@ -139,9 +159,13 @@ class user:
 
     def location(self):
         #居住地 3,2
-        res = self.soup.find('span', {'class':'info-wrap'})
-        res = res.span['title']
-        return res
+        try:
+            res = self.soup.find('span', {'class':'info-wrap'})
+            res = res.span['title']
+            return res
+        except KeyError:
+            res = "no data"
+            return res
 
     def fans(self):
         #粉丝数 3,3
@@ -178,9 +202,13 @@ class user:
 
     def job(self):
         #职业 3,8
-        res = self.soup.find('span', {'class':'business'})
-        business = res['title']
-        return business
+        try:
+            res = self.soup.find('span', {'class':'business'})
+            business = res['title']
+            return business
+        except KeyError:
+            res = 'no data'
+            return res
 
     def watching(self):
         #关注话题数 3,9
